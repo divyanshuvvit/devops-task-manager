@@ -1,11 +1,11 @@
+
 pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
-                checkout scm
+                echo 'Code checked out from GitHub'
             }
         }
 
@@ -32,9 +32,9 @@ pipeline {
         stage('Verify') {
             steps {
                 sh '''
-                sleep 5
-                sh 'curl -f http://localhost:5000/health'
-                curl -f http://localhost:8081/health
+                    sleep 5
+                    curl -f http://localhost:5000/health
+                    curl -f http://localhost:8081/health
                 '''
             }
         }
@@ -42,11 +42,10 @@ pipeline {
 
     post {
         success {
-            echo 'Application deployed successfully!'
+            echo 'SUCCESS: Application deployed and verified!'
         }
-
         failure {
-            echo 'Deployment failed. Check console logs.'
+            echo 'FAILURE: Check console logs.'
         }
     }
 }
