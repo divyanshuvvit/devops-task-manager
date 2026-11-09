@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevOps Task Manager</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2ff;
+            padding: 50px;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 12px;
+        }
+        input, button {
+            padding: 12px;
+            margin: 8px;
+        }
+        li {
+            padding: 10px;
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DevOps Task Manager</h1>
+        <p>React-free static frontend for a fast deployment demo</p>
+
+        <input id="task" placeholder="Enter a task">
+        <button onclick="addTask()">Add Task</button>
+
+        <ul id="tasks"></ul>
+        <p id="status">Checking server...</p>
+    </div>
+
+    <script>
+        const API = "/api";
+
+        async function loadTasks() {
+            const response = await fetch(`${API}/tasks`);
+            const tasks = await response.json();
+
+            document.getElementById("tasks").innerHTML =
+                tasks.map(task => `
+                    <li>
+                        ${task.title}
+                        <button onclick="deleteTask(${task.id})">
+                            Delete
+                        </button>
+                    </li>
+                `).join("");
+        }
+
+        async function addTask() {
+            const title = document.getElementById("task").value;
+
+            if (!title.trim()) return;
+
+            await fetch(`${API}/tasks`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({title})
+            });
+
+            document.getElementById("task").value = "";
+            loadTasks();
+        }
+
+        async function deleteTask(id) {
+            await fetch(`${API}/tasks/${id}`, {
+                method: "DELETE"
+            });
+            loadTasks();
+        }
+
+        fetch("/health")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("status").innerText =
+                    "Backend Status: " + data.status;
+            });
+
+        loadTasks();
+    </script>
+</body>
+</html>
